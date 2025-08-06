@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sec-analyzer"
+version = "0.1.0"
+description = "A comprehensive tool for downloading and cleaning SEC documents for AI ingestion"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "SEC Analyzer Team", email = "team@sec-analyzer.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Text Processing :: Markup :: HTML",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "edgar-sec>=2.0.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "aiofiles>=23.0.0",
+    "pydantic>=2.0.0",
+    "click>=8.0.0",
+    "pyyaml>=6.0.0",
+    "requests>=2.31.0",
+    "aiohttp>=3.8.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+sec-analyzer = "sec_analyzer.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Federallyapproved/sec_analyzer"
+Repository = "https://github.com/Federallyapproved/sec_analyzer"
+Issues = "https://github.com/Federallyapproved/sec_analyzer/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=src/sec_analyzer --cov-report=html --cov-report=term-missing"
+asyncio_mode = "auto"

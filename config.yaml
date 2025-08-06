@@ -1,0 +1,36 @@
+
+user_agent: "SEC Analyzer v0.1.0 (contact@example.com)"
+
+output_dir: "output"
+cache_dir: "cache"
+
+forms_to_process:
+  - "10-K"
+  - "10-Q" 
+  - "8-K"
+  - "DEF 14A"
+
+max_concurrent_downloads: 5
+rate_limit_delay: 0.1  # seconds between requests
+
+save_raw_documents: true
+save_clean_text: true
+save_structured_data: true
+
+output_formats:
+  - "txt"
+  - "json"
+  - "markdown"
+
+cleaning_options:
+  remove_html_tags: true
+  remove_xbrl_tags: true
+  preserve_tables: true
+  preserve_sections: true
+  remove_boilerplate: true
+  normalize_whitespace: true
+  extract_financial_data: true
+  min_section_length: 50
+
+log_level: "INFO"
+log_file: "sec_analyzer.log"
