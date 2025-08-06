@@ -1,5 +1,5 @@
 """
-SEC document downloader using edgar-sec library.
+SEC document downloader using direct SEC API calls.
 """
 
 import asyncio
@@ -10,7 +10,6 @@ from datetime import datetime
 
 import aiofiles
 import aiohttp
-from edgar_sec import Company, Filing as EdgarFiling
 
 from .models import Filing, AnalyzerConfig
 
@@ -44,24 +43,37 @@ class SECDownloader:
         try:
             logger.info(f"Fetching filings for ticker: {ticker}")
             
-            from edgar_sec import EdgarAPI
-            api = EdgarAPI()
+            if not self.session:
+                raise RuntimeError("Downloader not initialized. Use async context manager.")
             
-            ticker_to_cik = {
-                'RDDT': '0001713445',
-                'AAPL': '0000320193',
-                'MSFT': '0000789019',
-                'GOOGL': '0001652044',
-                'TSLA': '0001318605'
+            headers = {
+                'User-Agent': self.config.user_agent,
+                'Accept': 'application/json',
+                'Accept-Encoding': 'gzip, deflate',
+                'Connection': 'keep-alive',
             }
             
-            cik = ticker_to_cik.get(ticker.upper())
+            async with self.session.get('https://www.sec.gov/files/company_tickers.json', headers=headers) as response:
+                response.raise_for_status()
+                tickers_data = await response.json()
+            
+            cik = None
+            company_name = ticker
+            for company_data in tickers_data.values():
+                if company_data.get('ticker') == ticker.upper():
+                    cik = f"{company_data['cik_str']:010d}"
+                    company_name = company_data['title']
+                    break
+            
             if not cik:
-                raise ValueError(f"CIK not found for ticker {ticker}. Supported tickers: {list(ticker_to_cik.keys())}")
+                raise ValueError(f"CIK not found for ticker {ticker}")
             
-            submissions = api.get_submissions(cik)
+            submissions_url = f"https://data.sec.gov/submissions/CIK{cik}.json"
+            async with self.session.get(submissions_url, headers=headers) as response:
+                response.raise_for_status()
+                submissions = await response.json()
             
-            company_name = submissions.get('name', ticker)
+            company_name = submissions.get('name', company_name)
             filings_data = submissions.get('filings', {}).get('recent', {})
             
             result_filings = []
@@ -192,30 +204,38 @@ class SECDownloader:
     async def get_company_info(self, ticker: str) -> Dict[str, Any]:
         """Get basic company information."""
         try:
-            from edgar_sec import EdgarAPI
-            api = EdgarAPI()
+            if not self.session:
+                raise RuntimeError("Downloader not initialized. Use async context manager.")
             
-            ticker_to_cik = {
-                'RDDT': '0001713445',
-                'AAPL': '0000320193',
-                'MSFT': '0000789019',
-                'GOOGL': '0001652044',
-                'TSLA': '0001318605'
+            headers = {
+                'User-Agent': self.config.user_agent,
+                'Accept': 'application/json',
+                'Accept-Encoding': 'gzip, deflate',
+                'Connection': 'keep-alive',
             }
             
-            cik = ticker_to_cik.get(ticker.upper())
-            if not cik:
-                raise ValueError(f"CIK not found for ticker {ticker}. Supported tickers: {list(ticker_to_cik.keys())}")
+            async with self.session.get('https://www.sec.gov/files/company_tickers.json', headers=headers) as response:
+                response.raise_for_status()
+                tickers_data = await response.json()
             
-            submissions = api.get_submissions(cik)
+            for company_data in tickers_data.values():
+                if company_data.get('ticker') == ticker.upper():
+                    cik = f"{company_data['cik_str']:010d}"
+                    
+                    submissions_url = f"https://data.sec.gov/submissions/CIK{cik}.json"
+                    async with self.session.get(submissions_url, headers=headers) as response:
+                        response.raise_for_status()
+                        submissions = await response.json()
+                    
+                    return {
+                        'name': submissions.get('name', company_data['title']),
+                        'cik': cik,
+                        'ticker': ticker.upper(),
+                        'sic': submissions.get('sic', None),
+                        'industry': submissions.get('sicDescription', None),
+                    }
             
-            return {
-                'name': submissions.get('name', ticker),
-                'cik': cik,
-                'ticker': ticker.upper(),
-                'sic': submissions.get('sic', None),
-                'industry': submissions.get('sicDescription', None),
-            }
+            raise ValueError(f"Company not found for ticker {ticker}")
             
         except Exception as e:
             logger.error(f"Error getting company info for {ticker}: {e}")

@@ -32,7 +32,7 @@ def cli():
 @click.option('--forms', default='10-K,10-Q,8-K', help='Comma-separated form types to process')
 @click.option('--output-dir', default='output', help='Output directory for processed documents')
 @click.option('--cache-dir', default='cache', help='Cache directory for downloaded documents')
-@click.option('--user-agent', default='SEC Analyzer (contact@example.com)', help='User agent for SEC requests')
+@click.option('--user-agent', default='Self federallyapproved@gmail.com', help='User agent for SEC requests')
 @click.option('--max-concurrent', default=5, help='Maximum concurrent downloads')
 @click.option('--formats', default='txt,json,markdown', help='Output formats (txt,json,markdown)')
 @click.option('--no-raw', is_flag=True, help='Do not save raw HTML documents')
@@ -74,7 +74,7 @@ def analyze(
 @cli.command()
 @click.argument('ticker')
 @click.option('--output-dir', default='output', help='Output directory')
-@click.option('--user-agent', default='SEC Analyzer (contact@example.com)', help='User agent for SEC requests')
+@click.option('--user-agent', default='Self federallyapproved@gmail.com', help='User agent for SEC requests')
 def list_filings(ticker: str, output_dir: str, user_agent: str):
     """List available SEC filings for a ticker."""
     
@@ -91,7 +91,7 @@ def list_filings(ticker: str, output_dir: str, user_agent: str):
 @click.argument('ticker')
 @click.argument('accession_number')
 @click.option('--output-dir', default='output', help='Output directory')
-@click.option('--user-agent', default='SEC Analyzer (contact@example.com)', help='User agent for SEC requests')
+@click.option('--user-agent', default='Self federallyapproved@gmail.com', help='User agent for SEC requests')
 @click.option('--formats', default='txt,json', help='Output formats')
 def analyze_document(
     ticker: str, 
@@ -114,7 +114,7 @@ def analyze_document(
 
 @cli.command()
 @click.option('--output-dir', default='output', help='Output directory')
-@click.option('--user-agent', default='SEC Analyzer (contact@example.com)', help='User agent for SEC requests')
+@click.option('--user-agent', default='Self federallyapproved@gmail.com', help='User agent for SEC requests')
 def validate(output_dir: str, user_agent: str):
     """Validate SEC analyzer setup and connectivity."""
     
@@ -134,7 +134,7 @@ def summary(ticker: str, output_dir: str):
     """Show summary of processed documents for a ticker."""
     
     config = AnalyzerConfig(
-        user_agent="SEC Analyzer (contact@example.com)",
+        user_agent="Self federallyapproved@gmail.com",
         output_dir=Path(output_dir)
     )
     
